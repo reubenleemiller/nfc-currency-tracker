@@ -1,0 +1,1 @@
+export default function NotFound() { return <main className="grid min-h-screen place-items-center p-6"><div className="panel max-w-md p-8 text-center"><h1 className="text-3xl">Page not found</h1><p className="my-4">The link may be old or unavailable.</p><a className="btn" href="/">Go home</a></div></main>; }

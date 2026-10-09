@@ -1,0 +1,166 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum CardStatus {
+  AVAILABLE
+  ASSIGNED
+  LOST
+  RETIRED
+}
+
+enum TransactionKind {
+  AWARD
+  DEDUCT
+  PURCHASE
+  ADJUSTMENT
+  CORRECTION
+}
+
+model Teacher {
+  id String @id @default(cuid())
+  email String @unique
+  passwordHash String
+  displayName String
+  createdAt DateTime @default(now())
+  classrooms Classroom[]
+  students Student[]
+  cards Card[]
+  storeItems StoreItem[]
+  transactions Transaction[]
+  sessions Session[]
+}
+
+model Session {
+  id String @id @default(cuid())
+  teacherId String
+  tokenHash String @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  @@index([teacherId])
+}
+
+model Classroom {
+  id String @id @default(cuid())
+  teacherId String
+  name String
+  schoolYear String
+  currencyName String @default("Class Bucks")
+  currencySymbol String @default("$")
+  archived Boolean @default(false)
+  archivedAt DateTime?
+  createdAt DateTime @default(now())
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  students Student[]
+  transactions Transaction[]
+  awardPresets AwardPreset[]
+  @@index([teacherId, archived])
+  @@unique([id, teacherId])
+}
+
+model Student {
+  id String @id @default(cuid())
+  teacherId String
+  classroomId String?
+  displayName String
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  classroom Classroom? @relation(fields: [classroomId], references: [id], onDelete: SetNull)
+  assignments CardAssignment[]
+  transactions Transaction[]
+  @@index([teacherId, classroomId, active])
+}
+
+model Card {
+  id String @id @default(cuid())
+  teacherId String
+  token String @unique
+  shortCode String
+  label String
+  status CardStatus @default(AVAILABLE)
+  createdAt DateTime @default(now())
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  assignments CardAssignment[]
+  @@unique([teacherId, shortCode])
+  @@unique([teacherId, label])
+  @@index([teacherId, status])
+}
+
+model CardAssignment {
+  id String @id @default(cuid())
+  cardId String
+  studentId String
+  assignedAt DateTime @default(now())
+  endedAt DateTime?
+  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  @@index([cardId, endedAt])
+  @@index([studentId, endedAt])
+}
+
+model Transaction {
+  id String @id @default(cuid())
+  studentId String
+  classroomId String
+  amount Int
+  reason String
+  kind TransactionKind
+  storeItemId String?
+  createdByTeacherId String
+  voidedById String? @unique
+  idempotencyKey String
+  createdAt DateTime @default(now())
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  storeItem StoreItem? @relation(fields: [storeItemId], references: [id], onDelete: SetNull)
+  createdBy Teacher @relation(fields: [createdByTeacherId], references: [id])
+  correction Transaction? @relation("Correction", fields: [voidedById], references: [id], onDelete: SetNull)
+  correctedBy Transaction? @relation("Correction")
+  purchaseLines PurchaseLine[]
+  @@unique([createdByTeacherId, idempotencyKey])
+  @@index([studentId, createdAt])
+  @@index([classroomId, createdAt])
+}
+
+model PurchaseLine {
+  id String @id @default(cuid())
+  transactionId String
+  storeItemId String?
+  itemName String
+  unitPrice Int
+  quantity Int
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  storeItem StoreItem? @relation(fields: [storeItemId], references: [id], onDelete: SetNull)
+}
+
+model StoreItem {
+  id String @id @default(cuid())
+  teacherId String
+  name String
+  price Int
+  stock Int?
+  active Boolean @default(true)
+  sortOrder Int @default(0)
+  teacher Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  purchaseLines PurchaseLine[]
+  @@index([teacherId, active, sortOrder])
+  @@unique([teacherId, sortOrder])
+}
+
+model AwardPreset {
+  id String @id @default(cuid())
+  classroomId String
+  label String
+  amount Int
+  sortOrder Int @default(0)
+  classroom Classroom @relation(fields: [classroomId], references: [id], onDelete: Cascade)
+  @@index([classroomId, sortOrder])
+}

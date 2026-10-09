@@ -1,0 +1,2 @@
+"use client";
+export default function ErrorPage({ reset }: { reset: () => void }) { return <main className="grid min-h-screen place-items-center p-6"><div className="panel max-w-md p-8 text-center"><h1 className="text-2xl">Something went wrong</h1><p className="my-4 text-slate-600">Your information is safe. Try this page again.</p><button className="btn" onClick={reset}>Try again</button></div></main>; }

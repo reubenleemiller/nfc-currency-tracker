@@ -1,0 +1,21 @@
+node_modules
+.next
+.next-dev
+*.db
+*.db-journal
+backups/
+*.tsbuildinfo
+out
+dist
+.svelte-kit/
+*.local
+
+# dotenv environment variable files
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+
+# Finder (MacOS) folder config
+.DS_Store

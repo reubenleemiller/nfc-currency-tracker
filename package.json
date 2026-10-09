@@ -1,0 +1,39 @@
+{
+  "name": "nfc-currency-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "prisma generate && prisma db push && next dev --hostname 0.0.0.0 --port 8000",
+    "build": "prisma generate && next build",
+    "start": "next start --hostname 0.0.0.0 --port 8000",
+    "lint": "tsc --noEmit",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:prod:generate": "prisma generate --schema prisma/schema.postgresql.prisma",
+    "db:prod:migrate": "prisma migrate deploy --schema prisma/schema.postgresql.prisma"
+  },
+  "dependencies": {
+    "@prisma/client": "6.11.1",
+    "bcryptjs": "3.0.2",
+    "next": "15.5.20",
+    "react": "19.1.0",
+    "react-dom": "19.1.0",
+    "zod": "3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "22.16.4",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "autoprefixer": "10.4.21",
+    "postcss": "8.5.10",
+    "prisma": "6.11.1",
+    "tailwindcss": "3.4.17",
+    "tsx": "4.20.3",
+    "typescript": "5.8.3",
+    "vitest": "3.2.7"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  }
+}
